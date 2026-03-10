@@ -6,23 +6,13 @@ import "./mdx.css";
 import { ReportView } from "./view";
 import { Redis } from "@upstash/redis";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: {
     slug: string;
   };
 };
-
-const redis = Redis.fromEnv();
-
-export async function generateStaticParams(): Promise<Props["params"][]> {
-  return allProjects
-    .filter((p) => p.published)
-    .map((p) => ({
-      slug: p.slug,
-    }));
-}
 
 export default async function PostPage({ params }: Props) {
   const slug = params?.slug;
@@ -32,6 +22,7 @@ export default async function PostPage({ params }: Props) {
     notFound();
   }
 
+  const redis = Redis.fromEnv();
   const views =
     (await redis.get<number>(["pageviews", "projects", slug].join(":"))) ?? 0;
 
